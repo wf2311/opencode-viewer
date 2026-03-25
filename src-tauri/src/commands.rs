@@ -63,7 +63,7 @@ fn open_db(db_path: &str) -> Result<Connection, String> {
 pub async fn list_projects(db_path: String) -> Result<Vec<Project>, String> {
     let conn = open_db(&db_path)?;
     let mut stmt = conn
-        .prepare("SELECT id, worktree, name, icon_color, time_created FROM project ORDER BY time_updated DESC")
+        .prepare("SELECT id, worktree, name, icon_color, time_created FROM project ORDER BY time_created DESC")
         .map_err(|e| e.to_string())?;
     let projects = stmt
         .query_map([], |row| Ok(Project {
@@ -79,7 +79,7 @@ pub async fn list_projects(db_path: String) -> Result<Vec<Project>, String> {
 pub async fn list_sessions(db_path: String) -> Result<Vec<Session>, String> {
     let conn = open_db(&db_path)?;
     let mut stmt = conn
-        .prepare("SELECT id, project_id, parent_id, slug, directory, title, time_created, time_archived FROM session ORDER BY time_updated DESC")
+        .prepare("SELECT id, project_id, parent_id, slug, directory, title, time_created, time_archived FROM session ORDER BY time_created DESC")
         .map_err(|e| e.to_string())?;
     let sessions = stmt
         .query_map([], |row| Ok(Session {
