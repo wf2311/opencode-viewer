@@ -1,4 +1,4 @@
-use rusqlite::Connection;
+use rusqlite::{params_from_iter, Connection};
 use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
@@ -53,10 +53,23 @@ pub struct ModelUsage {
     pub total_cost: f64,
     pub total_tokens: i64,
     pub message_count: i64,
+    pub input_tokens: i64,
+    pub output_tokens: i64,
+    pub cache_read_tokens: i64,
+    pub cache_write_tokens: i64,
 }
 
 fn open_db(db_path: &str) -> Result<Connection, String> {
     Connection::open(db_path).map_err(|e| format!("Failed to open database: {}", e))
+}
+
+fn append_project_filter(query: &mut String, project_count: usize) {
+    if project_count == 0 {
+        return;
+    }
+    query.push_str(" AND s.project_id IN (");
+    query.push_str(&vec!["?"; project_count].join(","));
+    query.push(')');
 }
 
 #[tauri::command]
@@ -158,19 +171,34 @@ pub async fn list_messages(db_path: String, session_id: String) -> Result<Vec<Me
 }
 
 #[tauri::command]
-pub async fn get_usage_stats(db_path: String, days: i64) -> Result<Vec<DailyUsage>, String> {
+pub async fn get_usage_stats(db_path: String, days: i64, project_ids: Option<Vec<String>>) -> Result<Vec<DailyUsage>, String> {
     let conn = open_db(&db_path)?;
     let cutoff = days_cutoff(days);
-    let mut stmt = conn.prepare(r#"
-        SELECT date(time_created/1000,'unixepoch') as day,
+    let project_ids = match project_ids {
+        Some(ids) if ids.is_empty() => return Ok(Vec::new()),
+        Some(ids) => Some(ids),
+        None => None,
+    };
+    let mut query = String::from(r#"
+        SELECT date(m.time_created/1000,'unixepoch') as day,
             SUM(CAST(json_extract(data,'$.cost') AS REAL)),
             SUM(CAST(json_extract(data,'$.tokens.input') AS INTEGER)),
             SUM(CAST(json_extract(data,'$.tokens.output') AS INTEGER))
-        FROM message
-        WHERE json_extract(data,'$.role')='assistant' AND time_created>=?1
+        FROM message m
+        JOIN session s ON s.id = m.session_id
+        WHERE json_extract(data,'$.role')='assistant' AND m.time_created>=?1
           AND json_extract(data,'$.cost') IS NOT NULL
-        GROUP BY day ORDER BY day ASC"#).map_err(|e| e.to_string())?;
-    let rows = stmt.query_map([cutoff], |row| Ok(DailyUsage {
+    "#);
+    if let Some(project_ids) = &project_ids {
+        append_project_filter(&mut query, project_ids.len());
+    }
+    query.push_str(" GROUP BY day ORDER BY day ASC");
+    let mut stmt = conn.prepare(&query).map_err(|e| e.to_string())?;
+    let mut params = vec![rusqlite::types::Value::from(cutoff)];
+    if let Some(project_ids) = project_ids {
+        params.extend(project_ids.into_iter().map(rusqlite::types::Value::from));
+    }
+    let rows = stmt.query_map(params_from_iter(params), |row| Ok(DailyUsage {
         date: row.get::<_,String>(0).unwrap_or_default(),
         total_cost: row.get::<_,f64>(1).unwrap_or(0.0),
         input_tokens: row.get::<_,i64>(2).unwrap_or(0),
@@ -180,24 +208,47 @@ pub async fn get_usage_stats(db_path: String, days: i64) -> Result<Vec<DailyUsag
 }
 
 #[tauri::command]
-pub async fn get_model_stats(db_path: String, days: i64) -> Result<Vec<ModelUsage>, String> {
+pub async fn get_model_stats(db_path: String, days: i64, project_ids: Option<Vec<String>>) -> Result<Vec<ModelUsage>, String> {
     let conn = open_db(&db_path)?;
     let cutoff = days_cutoff(days);
-    let mut stmt = conn.prepare(r#"
+    let project_ids = match project_ids {
+        Some(ids) if ids.is_empty() => return Ok(Vec::new()),
+        Some(ids) => Some(ids),
+        None => None,
+    };
+    let mut query = String::from(r#"
         SELECT COALESCE(json_extract(data,'$.providerID'),'unknown'),
             COALESCE(json_extract(data,'$.modelID'),'unknown'),
             SUM(CAST(json_extract(data,'$.cost') AS REAL)),
             SUM(CAST(json_extract(data,'$.tokens.input') AS INTEGER)+CAST(json_extract(data,'$.tokens.output') AS INTEGER)),
-            COUNT(*)
-        FROM message
-        WHERE json_extract(data,'$.role')='assistant' AND time_created>=?1
-        GROUP BY 1,2 ORDER BY 3 DESC"#).map_err(|e| e.to_string())?;
-    let rows = stmt.query_map([cutoff], |row| Ok(ModelUsage {
+            COUNT(*),
+            SUM(CAST(json_extract(data,'$.tokens.input') AS INTEGER)),
+            SUM(CAST(json_extract(data,'$.tokens.output') AS INTEGER)),
+            SUM(COALESCE(CAST(json_extract(data,'$.tokens.cache.read') AS INTEGER),0)),
+            SUM(COALESCE(CAST(json_extract(data,'$.tokens.cache.write') AS INTEGER),0))
+        FROM message m
+        JOIN session s ON s.id = m.session_id
+        WHERE json_extract(data,'$.role')='assistant' AND m.time_created>=?1
+    "#);
+    if let Some(project_ids) = &project_ids {
+        append_project_filter(&mut query, project_ids.len());
+    }
+    query.push_str(" GROUP BY 1,2 ORDER BY 3 DESC");
+    let mut stmt = conn.prepare(&query).map_err(|e| e.to_string())?;
+    let mut params = vec![rusqlite::types::Value::from(cutoff)];
+    if let Some(project_ids) = project_ids {
+        params.extend(project_ids.into_iter().map(rusqlite::types::Value::from));
+    }
+    let rows = stmt.query_map(params_from_iter(params), |row| Ok(ModelUsage {
         provider_id: row.get::<_,String>(0).unwrap_or_else(|_| "unknown".into()),
         model_id: row.get::<_,String>(1).unwrap_or_else(|_| "unknown".into()),
         total_cost: row.get::<_,f64>(2).unwrap_or(0.0),
         total_tokens: row.get::<_,i64>(3).unwrap_or(0),
         message_count: row.get::<_,i64>(4).unwrap_or(0),
+        input_tokens: row.get::<_,i64>(5).unwrap_or(0),
+        output_tokens: row.get::<_,i64>(6).unwrap_or(0),
+        cache_read_tokens: row.get::<_,i64>(7).unwrap_or(0),
+        cache_write_tokens: row.get::<_,i64>(8).unwrap_or(0),
     })).map_err(|e| e.to_string())?.filter_map(|r| r.ok()).collect();
     Ok(rows)
 }

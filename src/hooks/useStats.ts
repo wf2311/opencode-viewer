@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
 import type { DailyUsage, ModelUsage } from '../lib/types';
 
-export function useStats(dbPath: string | null, days: number) {
+export function useStats(dbPath: string | null, days: number, projectIds?: string[]) {
   const [dailyUsage, setDailyUsage] = useState<DailyUsage[]>([]);
   const [modelUsage, setModelUsage] = useState<ModelUsage[]>([]);
   const [loading, setLoading] = useState(false);
@@ -13,8 +13,8 @@ export function useStats(dbPath: string | null, days: number) {
     setLoading(true);
     setError(null);
     Promise.all([
-      invoke<DailyUsage[]>('get_usage_stats', { dbPath, days }),
-      invoke<ModelUsage[]>('get_model_stats', { dbPath, days }),
+      invoke<DailyUsage[]>('get_usage_stats', { dbPath, days, projectIds }),
+      invoke<ModelUsage[]>('get_model_stats', { dbPath, days, projectIds }),
     ])
       .then(([daily, models]) => {
         setDailyUsage(daily);
@@ -22,7 +22,7 @@ export function useStats(dbPath: string | null, days: number) {
       })
       .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
-  }, [dbPath, days]);
+  }, [dbPath, days, projectIds]);
 
   return { dailyUsage, modelUsage, loading, error };
 }

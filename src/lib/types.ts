@@ -85,4 +85,33 @@ export interface ModelUsage {
   total_cost: number;
   total_tokens: number;
   message_count: number;
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_tokens: number;
+  cache_write_tokens: number;
+}
+
+// Workspace types
+export interface WorkspaceRule {
+  type: 'include' | 'exclude';
+  match: 'name' | 'path';
+  value: string;
+}
+
+export interface Workspace {
+  id: string;
+  name: string;
+  rules: WorkspaceRule[];
+}
+
+// Model pricing types
+export interface ModelPriceConfig {
+  input: number;   // cost per million input tokens
+  output: number;  // cost per million output tokens
+  cacheRead?: number;  // cost per million cache read tokens
+  cacheWrite?: number; // cost per million cache write tokens
+}
+
+export interface ModelPricingMap {
+  [modelId: string]: ModelPriceConfig;
 }
