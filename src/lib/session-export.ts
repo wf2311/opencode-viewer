@@ -81,7 +81,7 @@ export function exportToMarkdown(
       if (created) meta.push(formatDateTime(created));
       if (duration) meta.push(duration);
       if (data.tokens) {
-        meta.push(`${formatTokens(data.tokens.total ?? data.tokens.input + data.tokens.output)} tokens`);
+        meta.push(`${formatTokens(data.tokens.total ?? (data.tokens.input ?? 0) + (data.tokens.output ?? 0))} tokens`);
       }
       if (data.cost != null && data.cost > 0) meta.push(formatCost(data.cost));
       if (meta.length > 0) lines.push(`*${meta.join(' · ')}*`);

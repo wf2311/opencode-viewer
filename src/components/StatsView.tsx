@@ -23,7 +23,7 @@ export function StatsView({ dbPath, effectivePricing }: StatsViewProps) {
 
   // Recalculate model costs using custom pricing if available
   const adjustedModelUsage = useMemo(() => {
-    if (!effectivePricing || Object.keys(effectivePricing).length === 0) return modelUsage;
+    if (!effectivePricing) return modelUsage;
     return modelUsage.map(m => {
       const pricing = effectivePricing[m.model_id];
       if (!pricing) return m;

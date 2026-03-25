@@ -28,6 +28,7 @@ export function MessageList({ dbPath, sessionId, sessionTitle }: MessageListProp
   const handleExport = async (format: ExportFormat) => {
     setShowExportMenu(false);
     const title = sessionTitle ?? 'Session';
+    const safeTitle = title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_');
 
     let content: string;
     let filename: string;
@@ -35,11 +36,11 @@ export function MessageList({ dbPath, sessionId, sessionTitle }: MessageListProp
 
     if (format === 'markdown') {
       content = exportToMarkdown(messages, title);
-      filename = `${title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_')}.md`;
+      filename = `${safeTitle}.md`;
       mimeType = 'text/markdown';
     } else {
       content = exportToJson(messages, title);
-      filename = `${title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_')}.json`;
+      filename = `${safeTitle}.json`;
       mimeType = 'application/json';
     }
 
