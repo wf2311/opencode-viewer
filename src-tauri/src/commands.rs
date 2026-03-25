@@ -95,34 +95,65 @@ pub async fn list_sessions(db_path: String) -> Result<Vec<Session>, String> {
 #[tauri::command]
 pub async fn list_messages(db_path: String, session_id: String) -> Result<Vec<MessageWithParts>, String> {
     let conn = open_db(&db_path)?;
-    let mut msg_stmt = conn
-        .prepare("SELECT id, session_id, time_created, data FROM message WHERE session_id = ?1 ORDER BY time_created ASC")
+
+    // Single JOIN query to fetch messages and parts together, avoiding N+1 queries
+    let mut stmt = conn
+        .prepare(r#"
+            SELECT m.id, m.session_id, m.time_created, m.data,
+                   p.id AS part_id, p.data AS part_data
+            FROM message m
+            LEFT JOIN part p ON p.message_id = m.id
+            WHERE m.session_id = ?1
+            ORDER BY m.time_created ASC, p.time_created ASC
+        "#)
         .map_err(|e| e.to_string())?;
-    let messages: Vec<(String, String, Option<i64>, serde_json::Value)> = msg_stmt
+
+    let rows: Vec<(String, String, Option<i64>, String, Option<String>, Option<String>)> = stmt
         .query_map([&session_id], |row| {
-            let data_str: String = row.get(3)?;
-            Ok((row.get::<_, String>(0)?, row.get::<_, String>(1)?, row.get::<_, Option<i64>>(2)?, data_str))
+            Ok((
+                row.get::<_, String>(0)?,
+                row.get::<_, String>(1)?,
+                row.get::<_, Option<i64>>(2)?,
+                row.get::<_, String>(3)?,
+                row.get::<_, Option<String>>(4)?,
+                row.get::<_, Option<String>>(5)?,
+            ))
         })
         .map_err(|e| e.to_string())?
         .filter_map(|r| r.ok())
-        .filter_map(|(id, sid, tc, ds)| serde_json::from_str(&ds).ok().map(|d| (id, sid, tc, d)))
         .collect();
-    let mut result = Vec::new();
-    for (id, sid, tc, data) in messages {
-        let mut part_stmt = conn
-            .prepare("SELECT id, data FROM part WHERE message_id = ?1 ORDER BY time_created ASC")
-            .map_err(|e| e.to_string())?;
-        let parts: Vec<PartRow> = part_stmt
-            .query_map([&id], |row| {
-                let ds: String = row.get(1)?;
-                Ok((row.get::<_, String>(0)?, ds))
-            })
-            .map_err(|e| e.to_string())?
-            .filter_map(|r| r.ok())
-            .filter_map(|(pid, ds)| serde_json::from_str(&ds).ok().map(|d| PartRow { id: pid, data: d }))
-            .collect();
-        result.push(MessageWithParts { id, session_id: sid, time_created: tc, data, parts });
+
+    // Group rows by message id, preserving order
+    let mut result: Vec<MessageWithParts> = Vec::new();
+    let mut last_msg_id: Option<String> = None;
+
+    for (msg_id, sid, tc, msg_data_str, part_id, part_data_str) in rows {
+        // Start a new message group when message id changes
+        if last_msg_id.as_deref() != Some(&msg_id) {
+            let data = match serde_json::from_str(&msg_data_str) {
+                Ok(d) => d,
+                Err(_) => continue, // skip messages with invalid JSON
+            };
+            result.push(MessageWithParts {
+                id: msg_id.clone(),
+                session_id: sid,
+                time_created: tc,
+                data,
+                parts: Vec::new(),
+            });
+            last_msg_id = Some(msg_id);
+        }
+
+        // Append part to the current message (if the LEFT JOIN produced a part row)
+        if let (Some(pid), Some(pds)) = (part_id, part_data_str) {
+            if let Ok(part_data) = serde_json::from_str(&pds) {
+                if let Some(msg) = result.last_mut() {
+                    msg.parts.push(PartRow { id: pid, data: part_data });
+                }
+            }
+        }
     }
+
     Ok(result)
 }
 

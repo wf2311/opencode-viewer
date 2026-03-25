@@ -26,6 +26,7 @@ export interface MessageInfo {
   modelID?: string;
   providerID?: string;
   agent?: string;
+  content?: string;
   error?: any;
 }
 
