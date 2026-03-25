@@ -19,6 +19,14 @@ export function MessageList({ dbPath, sessionId, sessionTitle }: MessageListProp
   const virtuosoRef = useRef<VirtuosoHandle>(null);
   const [showExportMenu, setShowExportMenu] = useState(false);
 
+  const sanitizeFilename = (value: string) =>
+    value
+      .trim()
+      .replace(/[/\\:*?"<>|]/g, '_')
+      .replace(/\s+/g, '_')
+      .replace(/_+/g, '_')
+      .slice(0, 200) || 'Session';
+
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => virtuosoRef.current?.scrollToIndex({ index: messages.length - 1, behavior: 'auto' }), 50);
@@ -28,7 +36,7 @@ export function MessageList({ dbPath, sessionId, sessionTitle }: MessageListProp
   const handleExport = async (format: ExportFormat) => {
     setShowExportMenu(false);
     const title = sessionTitle ?? 'Session';
-    const safeTitle = title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_');
+    const safeTitle = sanitizeFilename(title);
 
     let content: string;
     let filename: string;

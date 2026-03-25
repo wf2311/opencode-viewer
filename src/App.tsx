@@ -59,6 +59,7 @@ export default function App() {
     () => filterProjectsByWorkspace(projects, activeWorkspace),
     [projects, activeWorkspace]
   );
+  const filteredProjectIds = useMemo(() => filteredProjects.map((project) => project.id), [filteredProjects]);
 
   // Filter sessions to only show those belonging to filtered projects
   const filteredSessions = useMemo(() => {
@@ -170,7 +171,12 @@ export default function App() {
             )}
           </Layout>
         ) : (
-          <StatsView dbPath={dbPath} effectivePricing={effectivePricing} />
+          <StatsView
+            dbPath={dbPath}
+            effectivePricing={effectivePricing}
+            projectIds={activeWorkspace ? filteredProjectIds : undefined}
+            workspaceName={activeWorkspace?.name ?? null}
+          />
         )}
       </div>
 

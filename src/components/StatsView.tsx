@@ -15,11 +15,13 @@ const COLORS = ['#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444'
 interface StatsViewProps {
   dbPath: string;
   effectivePricing?: ModelPricingMap;
+  projectIds?: string[];
+  workspaceName?: string | null;
 }
 
-export function StatsView({ dbPath, effectivePricing }: StatsViewProps) {
+export function StatsView({ dbPath, effectivePricing, projectIds, workspaceName }: StatsViewProps) {
   const [days, setDays] = useState(30);
-  const { dailyUsage, modelUsage, loading, error } = useStats(dbPath, days);
+  const { dailyUsage, modelUsage, loading, error } = useStats(dbPath, days, projectIds);
 
   // Recalculate model costs using custom pricing if available
   const adjustedModelUsage = useMemo(() => {
@@ -52,7 +54,14 @@ export function StatsView({ dbPath, effectivePricing }: StatsViewProps) {
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold">Usage Statistics</h2>
+        <div>
+          <h2 className="text-lg font-semibold">Usage Statistics</h2>
+          {workspaceName && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Filtered by workspace: {workspaceName}
+            </p>
+          )}
+        </div>
         <div className="flex gap-1">
           {[7, 30, 90].map((d) => (
             <Button

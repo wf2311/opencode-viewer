@@ -25,6 +25,7 @@ export function ModelPricingConfig({
   const [newOutput, setNewOutput] = useState('');
   const [newCacheRead, setNewCacheRead] = useState('');
   const [newCacheWrite, setNewCacheWrite] = useState('');
+  const [inputError, setInputError] = useState<string | null>(null);
 
   // Merge default + custom for display
   const allModels = new Set([
@@ -36,12 +37,24 @@ export function ModelPricingConfig({
     .filter((id) => !search || id.toLowerCase().includes(search.toLowerCase()))
     .sort();
 
+  const hasInvalidOptionalPrice = (value: number | undefined) =>
+    value != null && (!Number.isFinite(value) || value < 0);
+
   const handleAddCustom = () => {
     if (!newModelId.trim()) return;
-    const input = parseFloat(newInput) || 0;
-    const output = parseFloat(newOutput) || 0;
-    const cacheRead = newCacheRead ? parseFloat(newCacheRead) : undefined;
-    const cacheWrite = newCacheWrite ? parseFloat(newCacheWrite) : undefined;
+    const input = Number(newInput);
+    const output = Number(newOutput);
+    const cacheRead = newCacheRead ? Number(newCacheRead) : undefined;
+    const cacheWrite = newCacheWrite ? Number(newCacheWrite) : undefined;
+    if (!Number.isFinite(input) || input < 0 || !Number.isFinite(output) || output < 0) {
+      setInputError('Input / Output price must be a non-negative number.');
+      return;
+    }
+    if (hasInvalidOptionalPrice(cacheRead) || hasInvalidOptionalPrice(cacheWrite)) {
+      setInputError('Cache prices must be empty or non-negative numbers.');
+      return;
+    }
+    setInputError(null);
     onSetPrice(newModelId.trim(), { input, output, cacheRead, cacheWrite });
     setNewModelId('');
     setNewInput('');
@@ -131,6 +144,7 @@ export function ModelPricingConfig({
               <Plus className="h-3 w-3" />
             </Button>
           </div>
+          {inputError && <p className="mt-2 text-xs text-red-500">{inputError}</p>}
         </div>
 
         {/* Model list */}
