@@ -1,4 +1,3 @@
-import React from 'react';
 import { open } from '@tauri-apps/plugin-dialog';
 import { Button } from './ui/button';
 import { Database, FolderOpen } from 'lucide-react';

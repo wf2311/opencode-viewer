@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { DailyUsage, ModelUsage } from '../lib/types';
+import type { DailyUsage, ModelUsage } from '../lib/types';
 
 export function useStats(dbPath: string | null, days: number) {
   const [dailyUsage, setDailyUsage] = useState<DailyUsage[]>([]);

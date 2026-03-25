@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { ChevronRight, ChevronDown, Wrench, CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
-import { ToolState } from '../lib/types';
+import type { ToolState } from '../lib/types';
 import { CodeBlock } from './CodeBlock';
 import { cn } from '../lib/utils';
 

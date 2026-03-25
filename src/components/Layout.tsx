@@ -1,6 +1,6 @@
 import React from 'react';
 import { SessionTree } from './SessionTree';
-import { Project, Session } from '../lib/types';
+import type { Project, Session } from '../lib/types';
 import { Loader2, Search, X } from 'lucide-react';
 
 interface LayoutProps {

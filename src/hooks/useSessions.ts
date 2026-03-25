@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Session } from '../lib/types';
+import type { Session } from '../lib/types';
 
 function buildSessionTree(sessions: Session[]): Session[] {
   const map = new Map<string, Session>();

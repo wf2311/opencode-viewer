@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { Session, Project } from '../lib/types';
+import { useState } from 'react';
 import { ChevronRight, ChevronDown, Folder, FolderOpen, MessageSquare, Archive } from 'lucide-react';
+import type { Session, Project } from '../lib/types';
 import { cn } from '../lib/utils';
 
 interface SessionNodeProps {

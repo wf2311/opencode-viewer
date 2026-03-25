@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { MessageWithParts, PartData } from '../lib/types';
+import type { MessageWithParts, PartData } from '../lib/types';
 import { CodeBlock } from './CodeBlock';
 import { ToolCallBlock } from './ToolCallBlock';
 import { Badge } from './ui/badge';
@@ -18,7 +18,7 @@ function MarkdownContent({ text }: { text: string }) {
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
       components={{
-        code({ className, children, ...props }: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
+        code({ className, children }: React.HTMLAttributes<HTMLElement> & { children?: React.ReactNode }) {
           const match = /language-(\w+)/.exec(className || '');
           const code = String(children).replace(/\n$/, '');
           const isInline = !match && !code.includes('\n');

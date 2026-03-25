@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -89,7 +89,7 @@ export function StatsView({ dbPath }: StatsViewProps) {
                   <XAxis dataKey="date" tick={{ fontSize: 11 }} />
                   <YAxis tick={{ fontSize: 11 }} tickFormatter={(v) => formatTokens(v)} />
                   <Tooltip
-                    formatter={(v: number, name: string) => [formatTokens(v), name]}
+                    formatter={(v, name) => [formatTokens(Number(v)), String(name)]}
                     labelStyle={{ fontSize: 12 }}
                   />
                   <Legend />
@@ -115,14 +115,14 @@ export function StatsView({ dbPath }: StatsViewProps) {
                       cx="50%"
                       cy="50%"
                       outerRadius={70}
-                      label={({ name, percent }: { name: string; percent: number }) => `${(percent * 100).toFixed(0)}%`}
+                      label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
                       labelLine={false}
                     >
                       {modelUsage.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip formatter={(v: number) => formatCost(v)} />
+                    <Tooltip formatter={(v) => formatCost(Number(v))} />
                     <Legend formatter={(v: string) => v} />
                   </PieChart>
                 </ResponsiveContainer>

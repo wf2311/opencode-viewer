@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { Project } from '../lib/types';
+import type { Project } from '../lib/types';
 
 export function useProjects(dbPath: string | null) {
   const [projects, setProjects] = useState<Project[]>([]);

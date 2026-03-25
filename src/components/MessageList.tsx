@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
-import { Virtuoso, VirtuosoHandle } from 'react-virtuoso';
+import { useEffect, useRef } from 'react';
+import { Virtuoso } from 'react-virtuoso';
+import type { VirtuosoHandle } from 'react-virtuoso';
 import { useMessages } from '../hooks/useMessages';
 import { MessageItem } from './MessageItem';
 import { Loader2, MessageSquare } from 'lucide-react';

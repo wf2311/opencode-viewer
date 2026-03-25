@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { invoke } from '@tauri-apps/api/core';
-import { MessageWithParts } from '../lib/types';
+import type { MessageWithParts } from '../lib/types';
 
 export function useMessages(dbPath: string | null, sessionId: string | null) {
   const [messages, setMessages] = useState<MessageWithParts[]>([]);
