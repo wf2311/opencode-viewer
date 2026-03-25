@@ -1,24 +1,72 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Virtuoso } from 'react-virtuoso';
 import type { VirtuosoHandle } from 'react-virtuoso';
 import { useMessages } from '../hooks/useMessages';
 import { MessageItem } from './MessageItem';
-import { Loader2, MessageSquare } from 'lucide-react';
+import { Loader2, MessageSquare, Download, FileJson, FileText } from 'lucide-react';
+import { Button } from './ui/button';
+import { exportToMarkdown, exportToJson } from '../lib/session-export';
+import type { ExportFormat } from '../lib/session-export';
 
 interface MessageListProps {
   dbPath: string;
   sessionId: string;
+  sessionTitle?: string;
 }
 
-export function MessageList({ dbPath, sessionId }: MessageListProps) {
+export function MessageList({ dbPath, sessionId, sessionTitle }: MessageListProps) {
   const { messages, loading, error } = useMessages(dbPath, sessionId);
   const virtuosoRef = useRef<VirtuosoHandle>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => {
     if (messages.length > 0) {
       setTimeout(() => virtuosoRef.current?.scrollToIndex({ index: messages.length - 1, behavior: 'auto' }), 50);
     }
   }, [messages.length, sessionId]);
+
+  const handleExport = async (format: ExportFormat) => {
+    setShowExportMenu(false);
+    const title = sessionTitle ?? 'Session';
+
+    let content: string;
+    let filename: string;
+    let mimeType: string;
+
+    if (format === 'markdown') {
+      content = exportToMarkdown(messages, title);
+      filename = `${title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_')}.md`;
+      mimeType = 'text/markdown';
+    } else {
+      content = exportToJson(messages, title);
+      filename = `${title.replace(/[^a-zA-Z0-9\u4e00-\u9fa5_-]/g, '_')}.json`;
+      mimeType = 'application/json';
+    }
+
+    // Try Tauri save dialog first, fall back to browser download
+    try {
+      const { save } = await import('@tauri-apps/plugin-dialog');
+      const { writeTextFile } = await import('@tauri-apps/plugin-fs');
+      const filePath = await save({
+        filters: format === 'markdown'
+          ? [{ name: 'Markdown', extensions: ['md'] }]
+          : [{ name: 'JSON', extensions: ['json'] }],
+        defaultPath: filename,
+      });
+      if (filePath) {
+        await writeTextFile(filePath, content);
+      }
+    } catch {
+      // Fallback: browser download
+      const blob = new Blob([content], { type: mimeType });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+  };
 
   if (loading) {
     return (
@@ -46,15 +94,53 @@ export function MessageList({ dbPath, sessionId }: MessageListProps) {
   }
 
   return (
-    <Virtuoso
-      ref={virtuosoRef}
-      className="h-full"
-      data={messages}
-      itemContent={(_, message) => <MessageItem key={message.id} message={message} />}
-      components={{
-        Footer: () => <div className="h-4" />,
-        Header: () => <div className="h-2" />,
-      }}
-    />
+    <div className="flex flex-col h-full">
+      {/* Export toolbar */}
+      <div className="flex items-center justify-between px-4 py-1.5 border-b border-border flex-shrink-0">
+        <span className="text-xs text-muted-foreground">
+          {messages.length} message{messages.length !== 1 ? 's' : ''}
+          {sessionTitle && <span className="ml-2 font-medium text-foreground">{sessionTitle}</span>}
+        </span>
+        <div className="relative">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1 text-xs"
+            onClick={() => setShowExportMenu(!showExportMenu)}
+          >
+            <Download className="h-3.5 w-3.5" />
+            Export
+          </Button>
+          {showExportMenu && (
+            <div className="absolute right-0 top-full mt-1 bg-background border border-border rounded-md shadow-lg z-50 py-1 min-w-[140px]">
+              <button
+                className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-muted text-left"
+                onClick={() => handleExport('markdown')}
+              >
+                <FileText className="h-3.5 w-3.5" />
+                Export as Markdown
+              </button>
+              <button
+                className="flex items-center gap-2 w-full px-3 py-1.5 text-xs hover:bg-muted text-left"
+                onClick={() => handleExport('json')}
+              >
+                <FileJson className="h-3.5 w-3.5" />
+                Export as JSON
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+      <Virtuoso
+        ref={virtuosoRef}
+        className="flex-1"
+        data={messages}
+        itemContent={(_, message) => <MessageItem key={message.id} message={message} />}
+        components={{
+          Footer: () => <div className="h-4" />,
+          Header: () => <div className="h-2" />,
+        }}
+      />
+    </div>
   );
 }

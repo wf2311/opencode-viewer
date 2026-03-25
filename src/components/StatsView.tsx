@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -8,20 +8,46 @@ import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Button } from './ui/button';
 import { formatCost, formatTokens } from '../lib/utils';
 import { Loader2 } from 'lucide-react';
+import type { ModelPricingMap } from '../lib/types';
 
 const COLORS = ['#6366f1', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#ef4444', '#ec4899'];
 
 interface StatsViewProps {
   dbPath: string;
+  effectivePricing?: ModelPricingMap;
 }
 
-export function StatsView({ dbPath }: StatsViewProps) {
+export function StatsView({ dbPath, effectivePricing }: StatsViewProps) {
   const [days, setDays] = useState(30);
   const { dailyUsage, modelUsage, loading, error } = useStats(dbPath, days);
 
-  const totalCost = modelUsage.reduce((a, b) => a + b.total_cost, 0);
-  const totalTokens = modelUsage.reduce((a, b) => a + b.total_tokens, 0);
-  const totalMessages = modelUsage.reduce((a, b) => a + b.message_count, 0);
+  // Recalculate model costs using custom pricing if available
+  const adjustedModelUsage = useMemo(() => {
+    if (!effectivePricing || Object.keys(effectivePricing).length === 0) return modelUsage;
+    return modelUsage.map(m => {
+      const pricing = effectivePricing[m.model_id];
+      if (!pricing) return m;
+      // Recalculate cost based on custom pricing (prices are per million tokens)
+      const inputTokens = m.input_tokens ?? 0;
+      const outputTokens = m.output_tokens ?? 0;
+      const cacheReadTokens = m.cache_read_tokens ?? 0;
+      const cacheWriteTokens = m.cache_write_tokens ?? 0;
+      const newCost =
+        (inputTokens * pricing.input / 1_000_000) +
+        (outputTokens * pricing.output / 1_000_000) +
+        (cacheReadTokens * (pricing.cacheRead ?? 0) / 1_000_000) +
+        (cacheWriteTokens * (pricing.cacheWrite ?? 0) / 1_000_000);
+      // Only override if we have token data to calculate from
+      if (inputTokens > 0 || outputTokens > 0) {
+        return { ...m, total_cost: newCost };
+      }
+      return m;
+    });
+  }, [modelUsage, effectivePricing]);
+
+  const totalCost = adjustedModelUsage.reduce((a, b) => a + b.total_cost, 0);
+  const totalTokens = adjustedModelUsage.reduce((a, b) => a + b.total_tokens, 0);
+  const totalMessages = adjustedModelUsage.reduce((a, b) => a + b.message_count, 0);
 
   return (
     <div className="h-full overflow-y-auto p-4 space-y-4">
@@ -109,7 +135,7 @@ export function StatsView({ dbPath }: StatsViewProps) {
                 <ResponsiveContainer width="100%" height={180}>
                   <PieChart>
                     <Pie
-                      data={modelUsage}
+                      data={adjustedModelUsage}
                       dataKey="total_cost"
                       nameKey="model_id"
                       cx="50%"
@@ -118,7 +144,7 @@ export function StatsView({ dbPath }: StatsViewProps) {
                       label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
                       labelLine={false}
                     >
-                      {modelUsage.map((_, i) => (
+                      {adjustedModelUsage.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Pie>
@@ -135,13 +161,13 @@ export function StatsView({ dbPath }: StatsViewProps) {
               </CardHeader>
               <CardContent className="p-4 pt-0">
                 <ResponsiveContainer width="100%" height={180}>
-                  <BarChart data={modelUsage} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+                  <BarChart data={adjustedModelUsage} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                     <XAxis dataKey="model_id" tick={{ fontSize: 10 }} />
                     <YAxis tick={{ fontSize: 11 }} />
                     <Tooltip />
                     <Bar dataKey="message_count" name="Messages" fill="#6366f1" radius={[4, 4, 0, 0]}>
-                      {modelUsage.map((_, i) => (
+                      {adjustedModelUsage.map((_, i) => (
                         <Cell key={i} fill={COLORS[i % COLORS.length]} />
                       ))}
                     </Bar>
@@ -157,7 +183,7 @@ export function StatsView({ dbPath }: StatsViewProps) {
             </CardHeader>
             <CardContent className="p-4 pt-0">
               <div className="space-y-2">
-                {modelUsage.map((m, i) => (
+                {adjustedModelUsage.map((m, i) => (
                   <div key={i} className="flex items-center justify-between text-sm py-1 border-b border-border last:border-0">
                     <div className="flex items-center gap-2">
                       <div className="w-2 h-2 rounded-full" style={{ background: COLORS[i % COLORS.length] }} />
