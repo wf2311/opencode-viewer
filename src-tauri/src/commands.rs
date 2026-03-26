@@ -59,8 +59,18 @@ pub struct ModelUsage {
     pub cache_write_tokens: i64,
 }
 
+fn expand_tilde(path: &str) -> String {
+    if path.starts_with("~/") || path == "~" {
+        if let Some(home) = dirs::home_dir() {
+            return home.join(path.trim_start_matches("~/")).to_string_lossy().to_string();
+        }
+    }
+    path.to_string()
+}
+
 fn open_db(db_path: &str) -> Result<Connection, String> {
-    Connection::open(db_path).map_err(|e| format!("Failed to open database: {}", e))
+    let expanded = expand_tilde(db_path);
+    Connection::open(&expanded).map_err(|e| format!("Failed to open database: {}", e))
 }
 
 fn append_project_filter(query: &mut String, project_count: usize) {
