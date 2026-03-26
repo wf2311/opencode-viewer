@@ -187,7 +187,7 @@ export function StatsView({ dbPath, effectivePricing, projectIds, workspaceName 
                 <CardTitle className="text-sm font-semibold">Cost by Model</CardTitle>
               </CardHeader>
               <CardContent className="p-4 pt-0">
-                <ResponsiveContainer width="100%" height={200}>
+                <ResponsiveContainer width="100%" height={260}>
                   <PieChart>
                     <Pie
                       data={adjustedModelUsage}
@@ -195,10 +195,10 @@ export function StatsView({ dbPath, effectivePricing, projectIds, workspaceName 
                       nameKey="model_id"
                       cx="50%"
                       cy="50%"
-                      innerRadius={45}
-                      outerRadius={75}
+                      innerRadius={55}
+                      outerRadius={90}
                       paddingAngle={2}
-                      label={({ percent }: { percent?: number }) => `${((percent ?? 0) * 100).toFixed(0)}%`}
+                      label={false}
                       labelLine={false}
                       strokeWidth={0}
                     >
@@ -207,12 +207,20 @@ export function StatsView({ dbPath, effectivePricing, projectIds, workspaceName 
                       ))}
                     </Pie>
                     <Tooltip
-                      formatter={(v) => formatCost(Number(v))}
+                      formatter={(v, name) => [formatCost(Number(v)), String(name)]}
                       contentStyle={{ backgroundColor: 'hsl(var(--card))', border: '1px solid hsl(var(--border))', borderRadius: '8px', color: 'hsl(var(--foreground))' }}
                     />
-                    <Legend formatter={(v: string) => v} />
                   </PieChart>
                 </ResponsiveContainer>
+                <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 px-1">
+                  {adjustedModelUsage.map((m, i) => (
+                    <div key={i} className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                      <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: COLORS[i % COLORS.length] }} />
+                      <span className="truncate max-w-[120px]" title={m.model_id}>{m.model_id}</span>
+                      <span className="text-foreground font-medium tabular-nums">{((m.total_cost / (totalCost || 1)) * 100).toFixed(0)}%</span>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
 

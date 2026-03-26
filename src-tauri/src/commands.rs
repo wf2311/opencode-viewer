@@ -20,6 +20,7 @@ pub struct Session {
     pub directory: String,
     pub title: String,
     pub time_created: Option<i64>,
+    pub time_updated: Option<i64>,
     pub time_archived: Option<i64>,
 }
 
@@ -102,13 +103,13 @@ pub async fn list_projects(db_path: String) -> Result<Vec<Project>, String> {
 pub async fn list_sessions(db_path: String) -> Result<Vec<Session>, String> {
     let conn = open_db(&db_path)?;
     let mut stmt = conn
-        .prepare("SELECT id, project_id, parent_id, slug, directory, title, time_created, time_archived FROM session ORDER BY time_created DESC")
+        .prepare("SELECT id, project_id, parent_id, slug, directory, title, time_created, time_updated, time_archived FROM session ORDER BY time_updated DESC")
         .map_err(|e| e.to_string())?;
     let sessions = stmt
         .query_map([], |row| Ok(Session {
             id: row.get(0)?, project_id: row.get(1)?, parent_id: row.get(2)?,
             slug: row.get(3)?, directory: row.get(4)?, title: row.get(5)?,
-            time_created: row.get(6)?, time_archived: row.get(7)?,
+            time_created: row.get(6)?, time_updated: row.get(7)?, time_archived: row.get(8)?,
         }))
         .map_err(|e| e.to_string())?
         .filter_map(|r| r.ok()).collect();

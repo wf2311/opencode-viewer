@@ -1,5 +1,5 @@
 import React from 'react';
-import { SessionTree } from './SessionTree';
+import { ProjectList, SessionList } from './SessionTree';
 import type { Project, Session } from '../lib/types';
 import { Loader2, Search, X } from 'lucide-react';
 
@@ -8,9 +8,12 @@ interface LayoutProps {
   sessions: Session[];
   sessionsLoading: boolean;
   selectedSessionId: string | null;
+  selectedProjectId: string | null;
   onSessionSelect: (id: string) => void;
+  onProjectSelect: (id: string) => void;
   children: React.ReactNode;
-  sidebarWidth?: number;
+  projectPanelWidth?: number;
+  sessionPanelWidth?: number;
 }
 
 export function Layout({
@@ -18,14 +21,24 @@ export function Layout({
   sessions,
   sessionsLoading,
   selectedSessionId,
+  selectedProjectId,
   onSessionSelect,
+  onProjectSelect,
   children,
-  sidebarWidth = 280,
+  projectPanelWidth = 220,
+  sessionPanelWidth = 280,
 }: LayoutProps) {
   const [search, setSearch] = React.useState('');
 
+  // Sessions for the selected project
+  const projectSessions = React.useMemo(() => {
+    if (!selectedProjectId) return [];
+    return sessions.filter(s => s.project_id === selectedProjectId);
+  }, [sessions, selectedProjectId]);
+
+  // Apply search filter on project sessions
   const filteredSessions = React.useMemo(() => {
-    if (!search.trim()) return sessions;
+    if (!search.trim()) return projectSessions;
     const q = search.toLowerCase();
     const filterTree = (s: Session): Session | null => {
       const matches = s.title.toLowerCase().includes(q) || s.directory.toLowerCase().includes(q);
@@ -35,14 +48,39 @@ export function Layout({
       }
       return null;
     };
-    return sessions.map(filterTree).filter(Boolean) as Session[];
-  }, [sessions, search]);
+    return projectSessions.map(filterTree).filter(Boolean) as Session[];
+  }, [projectSessions, search]);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-background">
+    <div className="flex h-full overflow-hidden bg-background">
+      {/* Left panel: Projects */}
       <div
         className="flex flex-col border-r border-border bg-card/30 overflow-hidden flex-shrink-0"
-        style={{ width: sidebarWidth }}
+        style={{ width: projectPanelWidth }}
+      >
+        <div className="px-3 py-2 border-b border-border">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Projects</span>
+        </div>
+        <div className="flex-1 overflow-y-auto">
+          {sessionsLoading ? (
+            <div className="flex items-center justify-center py-8">
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            </div>
+          ) : (
+            <ProjectList
+              projects={projects}
+              sessions={sessions}
+              selectedProjectId={selectedProjectId}
+              onSelectProject={onProjectSelect}
+            />
+          )}
+        </div>
+      </div>
+
+      {/* Middle panel: Sessions */}
+      <div
+        className="flex flex-col border-r border-border bg-card/20 overflow-hidden flex-shrink-0"
+        style={{ width: sessionPanelWidth }}
       >
         <div className="p-2 border-b border-border">
           <div className="relative">
@@ -65,13 +103,16 @@ export function Layout({
           </div>
         </div>
         <div className="flex-1 overflow-y-auto">
-          {sessionsLoading ? (
+          {!selectedProjectId ? (
+            <div className="flex flex-col items-center justify-center h-32 text-muted-foreground">
+              <p className="text-xs">Select a project</p>
+            </div>
+          ) : sessionsLoading ? (
             <div className="flex items-center justify-center py-8">
               <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
             </div>
           ) : (
-            <SessionTree
-              projects={projects}
+            <SessionList
               sessions={filteredSessions}
               selectedId={selectedSessionId}
               onSelect={onSessionSelect}
@@ -79,6 +120,8 @@ export function Layout({
           )}
         </div>
       </div>
+
+      {/* Right: Content */}
       <div className="flex-1 overflow-hidden">{children}</div>
     </div>
   );

@@ -14,6 +14,7 @@ export interface Session {
   directory: string;
   title: string;
   time_created: number | null;
+  time_updated: number | null;
   time_archived: number | null;
   children?: Session[];
 }

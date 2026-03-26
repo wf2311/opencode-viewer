@@ -58,6 +58,7 @@ export default function App() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [view, setView] = useState<View>('sessions');
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
+  const [selectedProjectId, setSelectedProjectId] = useState<string | null>(null);
   const [showWorkspaceManager, setShowWorkspaceManager] = useState(false);
   const [showModelPricing, setShowModelPricing] = useState(false);
   const { theme, toggleTheme } = useTheme();
@@ -120,6 +121,7 @@ export default function App() {
     if (selected) {
       setDbPath(selected as string);
       setSelectedSessionId(null);
+      setSelectedProjectId(null);
     }
   };
 
@@ -133,7 +135,7 @@ export default function App() {
   }
 
   if (!dbPath) {
-    return <DbSelector dbPath={null} defaultPathSuggestion={defaultDbPathSuggestion} onSelect={(p) => { setDbPath(p); setSelectedSessionId(null); }} />;
+    return <DbSelector dbPath={null} defaultPathSuggestion={defaultDbPathSuggestion} onSelect={(p) => { setDbPath(p); setSelectedSessionId(null); setSelectedProjectId(null); }} />;
   }
 
   return (
@@ -210,7 +212,9 @@ export default function App() {
             sessions={filteredSessions}
             sessionsLoading={sessionsLoading || projectsLoading}
             selectedSessionId={selectedSessionId}
+            selectedProjectId={selectedProjectId}
             onSessionSelect={setSelectedSessionId}
+            onProjectSelect={setSelectedProjectId}
           >
             {selectedSessionId ? (
               <MessageList dbPath={dbPath} sessionId={selectedSessionId} sessionTitle={selectedSessionTitle} />
@@ -239,6 +243,7 @@ export default function App() {
           onSelect={(id) => {
             setActiveWorkspaceId(id);
             setSelectedSessionId(null);
+            setSelectedProjectId(null);
           }}
           onAdd={addWorkspace}
           onUpdate={updateWorkspace}
