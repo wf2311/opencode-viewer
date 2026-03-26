@@ -30,6 +30,7 @@ function findSessionTitle(sessions: Session[], sessionId: string): string | unde
 
 export default function App() {
   const [dbPath, setDbPath] = useState<string | null>(null);
+  const [defaultDbPathSuggestion, setDefaultDbPathSuggestion] = useState<string | null>(null);
   const [isInitializing, setIsInitializing] = useState(true);
   const [view, setView] = useState<View>('sessions');
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
@@ -75,8 +76,12 @@ export default function App() {
   }, [sessions, selectedSessionId]);
 
   useEffect(() => {
-    invoke<string | null>('get_default_db_path').then((path) => {
+    Promise.all([
+      invoke<string | null>('get_default_db_path'),
+      invoke<string | null>('get_default_db_path_suggestion'),
+    ]).then(([path, suggestion]) => {
       if (path) setDbPath(path);
+      if (suggestion) setDefaultDbPathSuggestion(suggestion);
     }).finally(() => {
       setIsInitializing(false);
     });
@@ -103,7 +108,7 @@ export default function App() {
   }
 
   if (!dbPath) {
-    return <DbSelector dbPath={null} onSelect={(p) => { setDbPath(p); setSelectedSessionId(null); }} />;
+    return <DbSelector dbPath={null} defaultPathSuggestion={defaultDbPathSuggestion} onSelect={(p) => { setDbPath(p); setSelectedSessionId(null); }} />;
   }
 
   return (
