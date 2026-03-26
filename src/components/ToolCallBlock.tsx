@@ -11,10 +11,10 @@ interface ToolCallBlockProps {
 }
 
 const statusIcon = {
-  completed: <CheckCircle className="h-3.5 w-3.5 text-green-500" />,
-  running: <Loader2 className="h-3.5 w-3.5 text-blue-500 animate-spin" />,
-  pending: <Clock className="h-3.5 w-3.5 text-yellow-500" />,
-  error: <AlertCircle className="h-3.5 w-3.5 text-red-500" />,
+  completed: <CheckCircle className="h-3.5 w-3.5 text-ctp-green" />,
+  running: <Loader2 className="h-3.5 w-3.5 text-ctp-blue animate-spin" />,
+  pending: <Clock className="h-3.5 w-3.5 text-ctp-yellow" />,
+  error: <AlertCircle className="h-3.5 w-3.5 text-ctp-red" />,
 };
 
 export function ToolCallBlock({ tool, state }: ToolCallBlockProps) {
@@ -49,14 +49,14 @@ export function ToolCallBlock({ tool, state }: ToolCallBlockProps) {
               <div className="text-xs font-semibold text-muted-foreground mb-1">OUTPUT</div>
               <pre className={cn(
                 "rounded-md border border-border p-3 text-xs font-mono overflow-x-auto whitespace-pre-wrap max-h-64 overflow-y-auto",
-                status === 'error' ? 'bg-red-50 border-red-200 text-red-800' : 'bg-muted/50'
+                status === 'error' ? 'bg-destructive/10 border-destructive/20 text-destructive' : 'bg-muted/50'
               )}>
                 {state.output}
               </pre>
             </div>
           )}
           {state?.error && (
-            <div className="text-xs text-red-600 bg-red-50 rounded p-2 border border-red-200">
+            <div className="text-xs text-destructive bg-destructive/10 rounded p-2 border border-destructive/20">
               {state.error}
             </div>
           )}

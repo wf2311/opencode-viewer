@@ -11,11 +11,35 @@ import { useProjects } from './hooks/useProjects';
 import { useSessions } from './hooks/useSessions';
 import { useWorkspaces, filterProjectsByWorkspace } from './hooks/useWorkspaces';
 import { useModelPricing } from './hooks/useModelPricing';
-import { BarChart2, MessageSquare, Database, FolderOpen, FolderTree, DollarSign } from 'lucide-react';
+import { BarChart2, MessageSquare, Database, FolderOpen, FolderTree, DollarSign, Sun, Moon } from 'lucide-react';
 import { open } from '@tauri-apps/plugin-dialog';
 import type { Session } from './lib/types';
 
 type View = 'sessions' | 'stats';
+type Theme = 'light' | 'dark';
+
+function useTheme() {
+  const [theme, setThemeState] = useState<Theme>(() => {
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('opencode-theme') as Theme | null;
+      return stored ?? 'dark';
+    }
+    return 'dark';
+  });
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (theme === 'dark') {
+      root.classList.add('dark');
+    } else {
+      root.classList.remove('dark');
+    }
+    localStorage.setItem('opencode-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setThemeState(t => t === 'dark' ? 'light' : 'dark');
+  return { theme, toggleTheme };
+}
 
 function findSessionTitle(sessions: Session[], sessionId: string): string | undefined {
   for (const s of sessions) {
@@ -36,6 +60,7 @@ export default function App() {
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [showWorkspaceManager, setShowWorkspaceManager] = useState(false);
   const [showModelPricing, setShowModelPricing] = useState(false);
+  const { theme, toggleTheme } = useTheme();
 
   const { projects, loading: projectsLoading } = useProjects(dbPath);
   const { sessions, loading: sessionsLoading } = useSessions(dbPath);
@@ -114,13 +139,13 @@ export default function App() {
   return (
     <div className="flex flex-col h-screen overflow-hidden">
       {/* Header */}
-      <header className="flex items-center gap-2 px-3 py-2 border-b border-border bg-background flex-shrink-0">
-        <Database className="h-4 w-4 text-muted-foreground" />
+      <header className="flex items-center gap-2 px-4 py-2.5 border-b border-border bg-card/50 backdrop-blur-sm flex-shrink-0">
+        <Database className="h-4 w-4 text-ctp-mauve" />
         <span className="text-xs text-muted-foreground font-mono truncate flex-1 max-w-xs" title={dbPath}>
           {dbPath}
         </span>
         {activeWorkspace && (
-          <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full font-medium">
+          <span className="text-xs bg-ctp-mauve/15 text-ctp-mauve px-2 py-0.5 rounded-full font-medium border border-ctp-mauve/20">
             {activeWorkspace.name}
           </span>
         )}
@@ -164,6 +189,15 @@ export default function App() {
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleBrowse}>
             <FolderOpen className="h-3.5 w-3.5" />
             Open DB
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="gap-1.5 ml-1"
+            onClick={toggleTheme}
+            title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+          >
+            {theme === 'dark' ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
           </Button>
         </div>
       </header>

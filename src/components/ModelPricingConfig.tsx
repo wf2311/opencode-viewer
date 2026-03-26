@@ -144,7 +144,7 @@ export function ModelPricingConfig({
               <Plus className="h-3 w-3" />
             </Button>
           </div>
-          {inputError && <p className="mt-2 text-xs text-red-500">{inputError}</p>}
+          {inputError && <p className="mt-2 text-xs text-destructive">{inputError}</p>}
         </div>
 
         {/* Model list */}
@@ -181,8 +181,8 @@ export function ModelPricingConfig({
                       <span
                         className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-medium ${
                           isCustom
-                            ? 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400'
-                            : 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400'
+                            ? 'bg-ctp-peach/15 text-ctp-peach'
+                            : 'bg-ctp-blue/15 text-ctp-blue'
                         }`}
                       >
                         {isCustom ? 'Custom' : 'Default'}
@@ -192,7 +192,7 @@ export function ModelPricingConfig({
                       {isCustom && (
                         <button
                           onClick={() => onRemovePrice(modelId)}
-                          className="text-muted-foreground hover:text-red-500 p-0.5"
+                          className="text-muted-foreground hover:text-ctp-red p-0.5"
                           title="Remove custom price (revert to default)"
                         >
                           <Trash2 className="h-3 w-3" />

@@ -41,7 +41,7 @@ export function Layout({
   return (
     <div className="flex h-screen overflow-hidden bg-background">
       <div
-        className="flex flex-col border-r border-border bg-background overflow-hidden flex-shrink-0"
+        className="flex flex-col border-r border-border bg-card/30 overflow-hidden flex-shrink-0"
         style={{ width: sidebarWidth }}
       >
         <div className="p-2 border-b border-border">

@@ -46,7 +46,7 @@ function MarkdownContent({ text }: { text: string }) {
         h2({ children }: React.HTMLAttributes<HTMLElement>) { return <h2 className="text-lg font-bold mb-2">{children}</h2>; },
         h3({ children }: React.HTMLAttributes<HTMLElement>) { return <h3 className="text-base font-bold mb-1">{children}</h3>; },
         a({ href, children }: React.AnchorHTMLAttributes<HTMLAnchorElement>) {
-          return <a href={href} className="text-blue-600 hover:underline" target="_blank" rel="noopener noreferrer">{children}</a>;
+          return <a href={href} className="text-ctp-blue hover:underline hover:text-ctp-sapphire transition-colors" target="_blank" rel="noopener noreferrer">{children}</a>;
         },
       }}
     >
@@ -116,7 +116,7 @@ export function MessageItem({ message }: MessageItemProps) {
             <User className="h-3 w-3" />
             {created && <span>{formatDateTime(created)}</span>}
           </div>
-          <div className="rounded-2xl rounded-tr-sm bg-primary text-primary-foreground px-4 py-2.5 text-sm">
+          <div className="rounded-2xl rounded-tr-sm bg-ctp-mauve/15 text-foreground px-4 py-2.5 text-sm border border-ctp-mauve/20">
             <div className="whitespace-pre-wrap">{text}</div>
           </div>
         </div>
@@ -126,8 +126,8 @@ export function MessageItem({ message }: MessageItemProps) {
 
   return (
     <div className={cn('flex gap-3 px-4 py-2')}>
-      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-secondary flex items-center justify-center mt-1">
-        <Bot className="h-4 w-4 text-secondary-foreground" />
+      <div className="flex-shrink-0 w-7 h-7 rounded-full bg-ctp-teal/15 flex items-center justify-center mt-1 border border-ctp-teal/20">
+        <Bot className="h-4 w-4 text-ctp-teal" />
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 mb-1.5 flex-wrap">
@@ -162,7 +162,7 @@ export function MessageItem({ message }: MessageItemProps) {
           ))}
         </div>
         {data.error && (
-          <div className="mt-2 text-sm text-red-600 bg-red-50 rounded-md p-2 border border-red-200">
+          <div className="mt-2 text-sm text-destructive bg-destructive/10 rounded-md p-2 border border-destructive/20">
             {typeof data.error === 'string' ? data.error : JSON.stringify(data.error)}
           </div>
         )}

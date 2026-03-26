@@ -88,7 +88,7 @@ export function MessageList({ dbPath, sessionId, sessionTitle }: MessageListProp
   if (error) {
     return (
       <div className="flex items-center justify-center h-full p-4">
-        <div className="text-red-500 text-sm">{error}</div>
+        <div className="text-destructive text-sm">{error}</div>
       </div>
     );
   }

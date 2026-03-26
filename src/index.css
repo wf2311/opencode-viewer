@@ -3,37 +3,107 @@
 @tailwind utilities;
 
 @layer base {
+  /* Catppuccin Latte (Cappuccino Light) */
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-    --border: 214.3 31.8% 91.4%;
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --radius: 0.5rem;
+    --background: 220 23% 95%;
+    --foreground: 234 16% 35%;
+    --card: 220 22% 92%;
+    --card-foreground: 234 16% 35%;
+    --border: 223 16% 83%;
+    --primary: 266 85% 58%;
+    --primary-foreground: 220 23% 95%;
+    --secondary: 220 21% 89%;
+    --secondary-foreground: 234 16% 35%;
+    --muted: 220 22% 92%;
+    --muted-foreground: 228 6% 47%;
+    --accent: 220 21% 89%;
+    --accent-foreground: 234 16% 35%;
+    --destructive: 347 87% 44%;
+    --destructive-foreground: 220 23% 95%;
+    --ring: 266 85% 58%;
+    --radius: 0.75rem;
+
+    /* Catppuccin Latte chart colors */
+    --chart-mauve: 266 85% 58%;
+    --chart-green: 109 58% 40%;
+    --chart-blue: 220 91% 54%;
+    --chart-peach: 22 99% 52%;
+    --chart-pink: 316 73% 69%;
+    --chart-teal: 183 74% 35%;
+    --chart-flamingo: 0 59% 67%;
+
+    /* Catppuccin Latte surface colors */
+    --surface0: 223 16% 83%;
+    --surface1: 223 13% 77%;
+    --surface2: 223 10% 71%;
+    --overlay0: 224 8% 65%;
+    --subtext0: 228 6% 47%;
+    --subtext1: 227 8% 41%;
+
+    /* Catppuccin accent colors */
+    --ctp-red: 347 87% 44%;
+    --ctp-green: 109 58% 40%;
+    --ctp-yellow: 35 77% 49%;
+    --ctp-blue: 220 91% 54%;
+    --ctp-mauve: 266 85% 58%;
+    --ctp-pink: 316 73% 69%;
+    --ctp-teal: 183 74% 35%;
+    --ctp-peach: 22 99% 52%;
+    --ctp-lavender: 231 97% 72%;
+    --ctp-sapphire: 189 70% 42%;
+    --ctp-sky: 197 97% 46%;
+    --ctp-rosewater: 11 59% 67%;
   }
-  
+
+  /* Catppuccin Mocha (Cappuccino Dark) */
   .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
+    --background: 240 21% 15%;
+    --foreground: 226 64% 88%;
+    --card: 240 21% 12%;
+    --card-foreground: 226 64% 88%;
+    --border: 231 16% 23%;
+    --primary: 267 83% 80%;
+    --primary-foreground: 240 21% 15%;
+    --secondary: 234 13% 31%;
+    --secondary-foreground: 226 64% 88%;
+    --muted: 231 16% 23%;
+    --muted-foreground: 231 11% 47%;
+    --accent: 234 13% 31%;
+    --accent-foreground: 226 64% 88%;
+    --destructive: 343 81% 75%;
+    --destructive-foreground: 240 21% 15%;
+    --ring: 267 83% 80%;
+
+    /* Catppuccin Mocha chart colors */
+    --chart-mauve: 267 83% 80%;
+    --chart-green: 115 54% 76%;
+    --chart-blue: 217 92% 76%;
+    --chart-peach: 23 92% 75%;
+    --chart-pink: 316 72% 86%;
+    --chart-teal: 170 57% 73%;
+    --chart-flamingo: 0 58% 94%;
+
+    /* Catppuccin Mocha surface colors */
+    --surface0: 231 16% 23%;
+    --surface1: 234 13% 31%;
+    --surface2: 233 12% 39%;
+    --overlay0: 231 11% 47%;
+    --subtext0: 227 13% 72%;
+    --subtext1: 228 24% 80%;
+
+    /* Catppuccin accent colors (Mocha) */
+    --ctp-red: 343 81% 75%;
+    --ctp-green: 115 54% 76%;
+    --ctp-yellow: 41 86% 83%;
+    --ctp-blue: 217 92% 76%;
+    --ctp-mauve: 267 83% 80%;
+    --ctp-pink: 316 72% 86%;
+    --ctp-teal: 170 57% 73%;
+    --ctp-peach: 23 92% 75%;
+    --ctp-lavender: 232 97% 85%;
+    --ctp-sapphire: 199 76% 69%;
+    --ctp-sky: 189 71% 73%;
+    --ctp-rosewater: 10 56% 91%;
   }
 
   * {
@@ -43,11 +113,71 @@
   body {
     background-color: hsl(var(--background));
     color: hsl(var(--foreground));
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Custom scrollbar — cappuccino style */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--surface1));
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--overlay0));
   }
 }
 
-/* highlight.js theme overrides */
+/* highlight.js — transparent bg, dark mode color overrides */
 .hljs {
   background: transparent !important;
+}
+
+/* Dark mode hljs overrides for Catppuccin Mocha syntax colors */
+.dark .hljs { color: hsl(226, 64%, 88%); }
+.dark .hljs-keyword,
+.dark .hljs-selector-tag { color: hsl(267, 83%, 80%); }
+.dark .hljs-string,
+.dark .hljs-addition { color: hsl(115, 54%, 76%); }
+.dark .hljs-number,
+.dark .hljs-literal { color: hsl(23, 92%, 75%); }
+.dark .hljs-comment,
+.dark .hljs-quote { color: hsl(231, 11%, 47%); }
+.dark .hljs-title,
+.dark .hljs-section { color: hsl(217, 92%, 76%); }
+.dark .hljs-name,
+.dark .hljs-type { color: hsl(41, 86%, 83%); }
+.dark .hljs-attr,
+.dark .hljs-attribute { color: hsl(217, 92%, 76%); }
+.dark .hljs-built_in { color: hsl(343, 81%, 75%); }
+.dark .hljs-meta { color: hsl(316, 72%, 86%); }
+.dark .hljs-deletion { color: hsl(343, 81%, 75%); }
+.dark .hljs-variable { color: hsl(10, 56%, 91%); }
+.dark .hljs-regexp { color: hsl(316, 72%, 86%); }
+.dark .hljs-symbol { color: hsl(170, 57%, 73%); }
+
+/* Recharts tooltip & legend dark mode */
+.dark .recharts-default-tooltip {
+  background-color: hsl(240, 21%, 12%) !important;
+  border-color: hsl(231, 16%, 23%) !important;
+  color: hsl(226, 64%, 88%) !important;
+}
+.dark .recharts-tooltip-label {
+  color: hsl(226, 64%, 88%) !important;
+}
+.dark .recharts-legend-item-text {
+  color: hsl(226, 64%, 88%) !important;
+}
+.dark .recharts-cartesian-grid line {
+  stroke: hsl(231, 16%, 23%) !important;
+}
+.dark .recharts-text {
+  fill: hsl(231, 11%, 47%) !important;
 }

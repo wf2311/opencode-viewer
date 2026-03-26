@@ -34,8 +34,8 @@ export function DbSelector({ dbPath, defaultPathSuggestion, onSelect }: DbSelect
   return (
     <div className="flex flex-col items-center justify-center h-full gap-6 p-8">
       <div className="flex flex-col items-center gap-3 text-center max-w-md">
-        <div className="rounded-full bg-primary/10 p-4">
-          <Database className="h-10 w-10 text-primary" />
+        <div className="rounded-2xl bg-gradient-to-br from-ctp-mauve/20 to-ctp-blue/10 p-5 border border-ctp-mauve/20">
+          <Database className="h-10 w-10 text-ctp-mauve" />
         </div>
         <h1 className="text-2xl font-bold">OpenCode Viewer</h1>
         <p className="text-muted-foreground text-sm">

@@ -63,7 +63,7 @@ function RuleEditor({
           />
           <button
             onClick={() => removeRule(i)}
-            className="text-muted-foreground hover:text-red-500 p-1"
+            className="text-muted-foreground hover:text-ctp-red p-1"
           >
             <Trash2 className="h-3 w-3" />
           </button>
@@ -179,7 +179,7 @@ export function WorkspaceManager({
                       onChange={(e) => setEditName(e.target.value)}
                       className="flex-1 rounded-md border border-border bg-background px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-primary/50"
                     />
-                    <button onClick={saveEditing} className="text-green-600 hover:text-green-700 p-1">
+                    <button onClick={saveEditing} className="text-ctp-green hover:text-ctp-green/80 p-1">
                       <Check className="h-3.5 w-3.5" />
                     </button>
                     <button onClick={cancelEditing} className="text-muted-foreground hover:text-foreground p-1">
@@ -205,7 +205,7 @@ export function WorkspaceManager({
                     </button>
                     <button
                       onClick={() => onDelete(workspace.id)}
-                      className="text-muted-foreground hover:text-red-500 p-1"
+                      className="text-muted-foreground hover:text-ctp-red p-1"
                     >
                       <Trash2 className="h-3 w-3" />
                     </button>
