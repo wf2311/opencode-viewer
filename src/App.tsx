@@ -30,6 +30,7 @@ function findSessionTitle(sessions: Session[], sessionId: string): string | unde
 
 export default function App() {
   const [dbPath, setDbPath] = useState<string | null>(null);
+  const [isInitializing, setIsInitializing] = useState(true);
   const [view, setView] = useState<View>('sessions');
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [showWorkspaceManager, setShowWorkspaceManager] = useState(false);
@@ -76,6 +77,8 @@ export default function App() {
   useEffect(() => {
     invoke<string | null>('get_default_db_path').then((path) => {
       if (path) setDbPath(path);
+    }).finally(() => {
+      setIsInitializing(false);
     });
   }, []);
 
@@ -89,6 +92,15 @@ export default function App() {
       setSelectedSessionId(null);
     }
   };
+
+  if (isInitializing) {
+    return (
+      <div className="flex flex-col items-center justify-center h-full gap-3 text-muted-foreground" role="status" aria-label="Loading database">
+        <Database className="h-8 w-8 animate-pulse" aria-hidden="true" />
+        <p className="text-sm">Loading...</p>
+      </div>
+    );
+  }
 
   if (!dbPath) {
     return <DbSelector dbPath={null} onSelect={(p) => { setDbPath(p); setSelectedSessionId(null); }} />;
