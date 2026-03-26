@@ -13,6 +13,7 @@ pub fn run() {
             commands::get_usage_stats,
             commands::get_model_stats,
             commands::get_default_db_path,
+            commands::get_default_db_path_suggestion,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

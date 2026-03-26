@@ -260,6 +260,13 @@ pub fn get_default_db_path() -> Option<String> {
     if path.exists() { Some(path.to_string_lossy().to_string()) } else { None }
 }
 
+#[tauri::command]
+pub fn get_default_db_path_suggestion() -> Option<String> {
+    let base = dirs::data_dir()?;
+    let path: PathBuf = base.join("opencode").join("opencode.db");
+    Some(path.to_string_lossy().to_string())
+}
+
 fn days_cutoff(days: i64) -> i64 {
     use std::time::{SystemTime, UNIX_EPOCH};
     let now = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis() as i64;
